@@ -38,11 +38,11 @@ testUtils.createTestButton(
 );
 
 testUtils.createTestButton("Eliminacion de Sample Dinamico", async (btn) => {
-  const token = await okLogin("pepe", "12345");
-  const listaSamples = await fetch("/api/samples/my-samples", {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+    const token = await okLogin("pepe", "12345");
+    const listaSamples = await fetch("/api/samples/my-samples", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+    });
 
   const data = await listaSamples.json();
   //testUtils.log(data);
@@ -68,4 +68,31 @@ testUtils.createTestButton("Eliminacion de Sample Dinamico", async (btn) => {
       testUtils.log("Error al eliminar: " + response.status);
     }
   }
+});
+
+testUtils.createTestButton("Test Sample - Informacion Incompleta", async (btn) => {
+    const token = await okLogin("pepe", "12345");
+
+    const formData = new FormData();
+    formData.append("display_name", "Sample Incompleto");
+    //formData.append("categoty", "drums"); // Omite el BPM para simular información incompleta
+    formData.append("bpm", "120");
+    const blob = new Blob(["fake wav"], { type: "audio/wav" });
+    formData.append("audioFile", blob, "test.wav");
+
+    const response = await fetch("/api/samples/upload", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    const data = await response.json();
+    console.log(data);
+
+    if (response.status == 400) {
+        testUtils.setSuccess(btn);
+        testUtils.log("Datos para carga del sample incompletos");
+    }
 });
