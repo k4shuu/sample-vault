@@ -19,3 +19,29 @@
     testUtils.log(data);
     if (response.ok) testUtils.setSuccess(btn);
 });
+
+testUtils.createTestButton("Test Admin: Eliminar usuarios del test", async (btn) => {
+    const token = await okLogin('admin', '12345'); // Login como admin para obtener token
+
+    const listRes = await fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const users = await listRes.json();
+
+    const testUsers = users.filter( u => u.username.startsWith('test') );
+
+    for (const user of testUsers) {
+        const delRes = await fetch(`/api/admin/users/${user.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const delData = await delRes.json();
+        testUtils.log(`Eliminado ${user.username}: ${delData.message}`);
+        
+        if (delRes.ok){
+            testUtils.setSuccess(btn);
+            testUtils.log(`Usuario ${user.username} eliminado exitosamente`);
+        }
+    }
+});
